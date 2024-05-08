@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/rlp"
 
 	// ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -75,18 +76,70 @@ func main() {
 
 	fmt.Println("block number:", header.Number.String())
 
+	// 获取nonce
+	nonce, err := client.PendingNonceAt(context.Background(), aWorkAddress)
+	if nil != err {
+		fmt.Println("PendingNonceAt err", err)
+		return
+	}
+
 	// build bundle
-	oneTx, err := transfer.SimpleTransfer(client, aWorkPrivateKey, nil, bWorkAddress, big.NewInt(1.345e9))
+	signedTx, err := transfer.SimpleTransfer(client, aWorkPrivateKey, &nonce, bWorkAddress, big.NewInt(1.345e9))
 	if nil != err {
 		fmt.Println("SimpleTransfer err", err)
 		return
 	}
-	txsList := []hexutil.Bytes{oneTx}
+
+	fmt.Println("signedTx hash:", signedTx.Hash().Hex())
+
+	// serialize transaction
+	rawTxBytes, err := rlp.EncodeToBytes(signedTx)
+	if nil != err {
+		fmt.Println("EncodeToBytes err", err)
+		return
+	}
+	txsList := []hexutil.Bytes{rawTxBytes}
+
+	// next nonce
+	nonce = nonce + 1
+	signedTx, err = transfer.SimpleTransfer(client, aWorkPrivateKey, &nonce, bWorkAddress, big.NewInt(1.345e9))
+	if nil != err {
+		fmt.Println("SimpleTransfer err", err)
+		return
+	}
+
+	fmt.Println("signedTx hash:", signedTx.Hash().Hex())
+
+	// serialize transaction
+	rawTxBytes, err = rlp.EncodeToBytes(signedTx)
+	if nil != err {
+		fmt.Println("EncodeToBytes err", err)
+		return
+	}
+	txsList = append(txsList, rawTxBytes)
+
+	// next nonce
+	nonce = nonce + 1
+	signedTx, err = transfer.SimpleTransfer(client, aWorkPrivateKey, &nonce, bWorkAddress, big.NewInt(1.345e9))
+	if nil != err {
+		fmt.Println("SimpleTransfer err", err)
+		return
+	}
+
+	fmt.Println("signedTx hash:", signedTx.Hash().Hex())
+
+	// serialize transaction
+	rawTxBytes, err = rlp.EncodeToBytes(signedTx)
+	if nil != err {
+		fmt.Println("EncodeToBytes err", err)
+		return
+	}
+	txsList = append(txsList, rawTxBytes)
 
 	// send bundle
 	args := types.SendBundleArgs{
 		Txs:            txsList,
-		MaxBlockNumber: header.Number.Uint64() + 5,
+		MaxBlockNumber: header.Number.Uint64() + 50,
 	}
 	err = types.SendBundle(client, context.Background(), &args)
 	if nil != err {
@@ -94,16 +147,28 @@ func main() {
 		return
 	}
 
-	// wait
-	// var signedTx ethTypes.Transaction
-	// err = rlp.DecodeBytes(oneTx, &signedTx)
-	// if nil != err {
-	// 	fmt.Println("DecodeBytes err", err)
-	// 	return
-	// }
-	// _, err = bind.WaitMined(context.Background(), client, &signedTx)
+	// build transaction
+	nonce = nonce + 1
+	signedTx, err = transfer.SimpleTransfer(client, aWorkPrivateKey, &nonce, bWorkAddress, big.NewInt(1.345e9))
+	if nil != err {
+		fmt.Println("SimpleTransfer err", err)
+		return
+	}
+
+	fmt.Println("signedTx hash:", signedTx.Hash().Hex())
+
+	// send transaction
+	err = client.SendTransaction(context.Background(), signedTx)
+	if nil != err {
+		fmt.Println("SendTransaction err", err)
+		return
+	}
+
+	// // wait
+	// _, err = bind.WaitMined(context.Background(), client, signedTx)
 	// if err != nil {
 	// 	fmt.Println("wait transaction error!!!")
 	// 	return
 	// }
+
 }

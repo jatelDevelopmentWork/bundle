@@ -6,14 +6,12 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rlp"
 )
 
-func SimpleTransfer(ec *ethclient.Client, privateKey *ecdsa.PrivateKey, fromNonce *uint64, to common.Address, amount *big.Int) (hexutil.Bytes, error) {
+func SimpleTransfer(ec *ethclient.Client, privateKey *ecdsa.PrivateKey, fromNonce *uint64, to common.Address, amount *big.Int) (*types.Transaction, error) {
 
 	var (
 		nonce uint64 = 0
@@ -52,12 +50,6 @@ func SimpleTransfer(ec *ethclient.Client, privateKey *ecdsa.PrivateKey, fromNonc
 		return nil, err
 	}
 
-	// 序列化交易
-	rawTxBytes, err := rlp.EncodeToBytes(signedTx)
-	if err != nil {
-		return nil, err
-	}
-
-	return hexutil.Bytes(rawTxBytes), nil
+	return signedTx, nil
 
 }
