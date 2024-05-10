@@ -8,11 +8,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/rlp"
-
-	// ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/jatelDevelopmentWork/bundle/authenticate"
 	"github.com/jatelDevelopmentWork/bundle/transfer"
 	"github.com/jatelDevelopmentWork/bundle/types"
 )
@@ -23,6 +22,10 @@ var (
 
 	bWorkPrivateKey *ecdsa.PrivateKey
 	bWorkAddress    common.Address // 0x9FD5bD701Fc8105E46399104AC4B8c1B391df760
+
+	// token
+	username = "jatel"
+	password = "123456"
 )
 
 func init() {
@@ -66,6 +69,9 @@ func main() {
 		return
 	}
 	defer client.Close()
+
+	// 设置认证方式
+	authenticate.SetBasicAuth(client, username, password)
 
 	// 获取区块高度
 	header, err := client.HeaderByNumber(context.Background(), nil)
