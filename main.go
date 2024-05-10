@@ -28,7 +28,8 @@ var (
 	password = "123456"
 
 	// test net
-	bscTestNet = "https://data-seed-prebsc-1-s1.binance.org:8545/"
+	bscTestNet = "https://data-seed-prebsc-1-s2.binance.org:8545/"
+	localNet   = "http://144.76.100.145:8575"
 )
 
 func init() {
@@ -152,7 +153,7 @@ func main() {
 	}
 
 	client.Close()
-	client, err = ethclient.Dial("http://144.76.100.145:8575")
+	client, err = ethclient.Dial(localNet)
 	if err != nil {
 		fmt.Println("Dial err", err)
 		return
