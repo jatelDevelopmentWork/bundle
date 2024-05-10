@@ -26,6 +26,9 @@ var (
 	// token
 	username = "jatel"
 	password = "123456"
+
+	// test net
+	bscTestNet = "https://data-seed-prebsc-1-s1.binance.org:8545/"
 )
 
 func init() {
@@ -63,7 +66,7 @@ func init() {
 
 func main() {
 	// 连接服务器
-	client, err := ethclient.Dial("http://localhost:8575")
+	client, err := ethclient.Dial(bscTestNet)
 	if err != nil {
 		fmt.Println("Dial err", err)
 		return
@@ -147,6 +150,16 @@ func main() {
 		Txs:            txsList,
 		MaxBlockNumber: header.Number.Uint64() + 50,
 	}
+
+	client.Close()
+	client, err = ethclient.Dial("http://144.76.100.145:8575")
+	if err != nil {
+		fmt.Println("Dial err", err)
+		return
+	}
+
+	// 设置认证方式
+	authenticate.SetBasicAuth(client, username, password)
 	err = types.SendBundle(client, context.Background(), &args)
 	if nil != err {
 		fmt.Println("SendBundle err", err)
@@ -155,6 +168,12 @@ func main() {
 
 	// build transaction
 	nonce = nonce + 1
+	client.Close()
+	client, err = ethclient.Dial(bscTestNet)
+	if err != nil {
+		fmt.Println("Dial err", err)
+		return
+	}
 	signedTx, err = transfer.SimpleTransfer(client, aWorkPrivateKey, &nonce, bWorkAddress, big.NewInt(1.345e9))
 	if nil != err {
 		fmt.Println("SimpleTransfer err", err)
