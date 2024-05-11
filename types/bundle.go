@@ -16,6 +16,12 @@ type SendBundleArgs struct {
 	RevertingTxHashes []common.Hash   `json:"revertingTxHashes"`
 }
 
-func SendBundle(ec *ethclient.Client, ctx context.Context, args *SendBundleArgs) error {
-	return ec.Client().CallContext(ctx, nil, "eth_sendBundle", args)
+func SendBundle(ec *ethclient.Client, ctx context.Context, args *SendBundleArgs) (common.Hash, error) {
+	var result common.Hash
+	err := ec.Client().CallContext(ctx, &result, "eth_sendBundle", args)
+	if nil != err {
+		return common.Hash{}, err
+	}
+
+	return result, nil
 }

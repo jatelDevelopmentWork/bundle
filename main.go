@@ -14,6 +14,7 @@ import (
 	"github.com/jatelDevelopmentWork/bundle/authenticate"
 	"github.com/jatelDevelopmentWork/bundle/transfer"
 	"github.com/jatelDevelopmentWork/bundle/types"
+	"github.com/jatelDevelopmentWork/bundle/validator"
 )
 
 var (
@@ -28,7 +29,7 @@ var (
 	password = "123456"
 
 	// test net
-	bscTestNet = "https://data-seed-prebsc-1-s2.binance.org:8545/"
+	bscTestNet = "https://bsc-testnet-dataseed.bnbchain.org"
 	localNet   = "http://144.76.100.145:8575"
 )
 
@@ -161,10 +162,19 @@ func main() {
 
 	// 设置认证方式
 	authenticate.SetBasicAuth(client, username, password)
-	err = types.SendBundle(client, context.Background(), &args)
+	bundleHash, err := types.SendBundle(client, context.Background(), &args)
 	if nil != err {
 		fmt.Println("SendBundle err", err)
 		return
+	}
+
+	fmt.Println("bundleHash:", bundleHash.Hex())
+
+	// 获取 register validatore
+	if validators, err := validator.GetRegisterValidator(client, context.Background()); nil != err {
+		fmt.Println("GetRegisterValidator err", err)
+	} else {
+		fmt.Println("validators:", validators)
 	}
 
 	// build transaction
